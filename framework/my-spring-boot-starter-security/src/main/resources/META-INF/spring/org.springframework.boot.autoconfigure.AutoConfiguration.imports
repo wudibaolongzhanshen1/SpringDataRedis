@@ -1,0 +1,2 @@
+cn.iocoder.boot.framework.security.config.MySecurityAutoConfiguration
+cn.iocoder.boot.framework.security.config.MyWebSecurityConfigurerAdapter

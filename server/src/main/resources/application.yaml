@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/hmdp?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  security:
+    user:
+      name: admin
+      password: 123456
+  application:
+    name: hmdp-server
+
+chenzilin:
+  info:
+    base-package: cn.iocoder.boot
+
+springdoc:
+  api-docs:
+    enabled: true # 开启 OpenAPI 接口文档
+  swagger-ui:
+    enabled: true # 开启 Swagger-UI 界面
+  writer-with-default-pretty-printer: true # 格式化输出 JSON

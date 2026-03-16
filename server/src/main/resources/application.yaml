@@ -10,10 +10,28 @@ spring:
       password: 123456
   application:
     name: hmdp-server
+  quartz:
+    job-store-type: jdbc
+    auto-startup: true
+    wait-for-jobs-to-complete-on-shutdown: true
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceId: AUTO
+            instanceName: schedulerName
+          jobStore:
+            # JobStore 实现类。可见博客：https://blog.csdn.net/weixin_42458219/article/details/122247162
+            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            isClustered: true # 是集群模式
+            clusterCheckinInterval: 15000 # 集群检查频率，单位：毫秒。默认为 15000，即 15 秒
+            misfireThreshold: 60000 # misfire 阀值，单位：毫秒。
 
 chenzilin:
   info:
     base-package: cn.iocoder.boot
+  security:
+    mock-enable: true
 
 springdoc:
   api-docs:
@@ -21,3 +39,15 @@ springdoc:
   swagger-ui:
     enabled: true # 开启 Swagger-UI 界面
   writer-with-default-pretty-printer: true # 格式化输出 JSON
+
+
+rocketmq:
+  name-server: 127.0.0.1:9876 # 生产环境建议配置多个，用分号隔开
+  producer:
+    group: g_hmdp_producer    # 必须指定生产者组
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+
+canal:
+  mq:
+    topic: canal-test-topic

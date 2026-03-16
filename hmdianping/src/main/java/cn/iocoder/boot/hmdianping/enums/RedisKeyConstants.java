@@ -1,4 +1,4 @@
-package cn.iocoder.boot.hmdianping.dal.redis;
+package cn.iocoder.boot.hmdianping.enums;
 
 
 /**
@@ -105,5 +105,28 @@ public interface RedisKeyConstants {
      * VALUE 数据格式 String, 模版信息
      */
     String WXA_SUBSCRIBE_TEMPLATE = "wxa_subscribe_template";
+
+    String SHOP_ID = "shop_id:%s";
+
+    String VOUCHER_ORDER_EXISTS_BY_USERID_VOUCHERID = "voucher_order:%s:%s";
+
+    String SECKILL_VOUCHER_EXISTS = "seckill_voucher:exists:%s";
+
+    String SECKIL_VOUCHER = "seckill_voucher:%s";
+
+    String VOUCHER_ORDER_BY_USERID_VOUCHERID = "voucher_order:%s:%s";
+
+    String SECKILL_STOCK = "seckill:stock:%s";
+
+    String SECKILL_ORDER = "seckill:order:%s";
+
+    String BLOG_LIKED_KEY = "blog:liked:";
+
+    String FEED_KEY = "feed:";
+
+    String BLOG_ID = "blog:%s";
+
+    // UV 统计的前缀。格式：uv:业务名:目标ID:日期
+    String UV_STAT_KEY = "uv:%s:%s:%s";
 
 }

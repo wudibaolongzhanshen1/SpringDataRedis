@@ -3,6 +3,7 @@ package cn.iocoder.boot.hmdianping.service.token.Impl;
 
 import cn.hutool.core.util.IdUtil;
 import cn.iocoder.boot.framework.common.enums.mysql.TokenExpiry;
+import cn.iocoder.boot.framework.common.exception.ServiceException;
 import cn.iocoder.boot.hmdianping.dal.dataobject.token.AccessTokenDO;
 import cn.iocoder.boot.hmdianping.dal.dataobject.token.RefreshTokenDO;
 import cn.iocoder.boot.hmdianping.dal.mysql.token.AccessTokenMapper;
@@ -83,10 +84,10 @@ public class TokenServiceImpl implements TokenService {
     public AccessTokenDO checkAccessToken(String accessToken) {
         AccessTokenDO accessTokenDO = getAccessToken(accessToken);
         if (accessTokenDO == null) {
-            throw new IllegalArgumentException("Access Token 不存在");
+            throw new ServiceException(500, "Access Token 不存在");
         }
         if (accessTokenDO.getExpiresTime().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Access Token 已过期");
+            throw new ServiceException(500, "Access Token 已过期");
         }
         return accessTokenDO;
     }

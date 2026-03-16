@@ -2,7 +2,7 @@ package cn.iocoder.boot.hmdianping.dal.redis.token;
 
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.iocoder.boot.hmdianping.dal.dataobject.token.AccessTokenDO;
-import cn.iocoder.boot.hmdianping.dal.redis.RedisKeyConstants;
+import cn.iocoder.boot.hmdianping.enums.RedisKeyConstants;
 import cn.iocoder.boot.framework.common.util.JsonUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

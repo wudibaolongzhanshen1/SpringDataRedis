@@ -1,1 +1,2 @@
 cn.iocoder.boot.framework.mybatis.config.MyMybatisAutoConfiguration
+cn.iocoder.boot.framework.mybatis.config.BloomFilterAutoConfiguration

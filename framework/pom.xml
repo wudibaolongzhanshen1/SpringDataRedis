@@ -16,6 +16,9 @@
         <module>my-spring-boot-starter-mybatis</module>
         <module>my-spring-boot-starter-web</module>
         <module>my-spring-boot-starter-security</module>
+        <module>my-spring-boot-starter-redis</module>
+        <module>my-spring-boot-starter-job</module>
+        <module>my-spring-boot-starter-mq</module>
         <module>common</module>
     </modules>
 

@@ -106,7 +106,7 @@ public interface RedisKeyConstants {
      */
     String WXA_SUBSCRIBE_TEMPLATE = "wxa_subscribe_template";
 
-    String SHOP_ID = "shop_id:%s";
+    String SHOP_ID = "shop:%s";
 
     String VOUCHER_ORDER_EXISTS_BY_USERID_VOUCHERID = "voucher_order:%s:%s";
 

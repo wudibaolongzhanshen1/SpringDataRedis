@@ -66,6 +66,7 @@
         <rocketmq-spring.version>2.3.0</rocketmq-spring.version>
         <canal.version>1.1.8</canal.version>
         <google.protobuf.version>3.11.4</google.protobuf.version>
+        <caffeine.version>3.1.8</caffeine.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -353,6 +354,22 @@
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-java</artifactId>
                 <version>${google.protobuf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-cache</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.iocoder.boot</groupId>
+                <artifactId>my-spring-boot-starter-cache</artifactId>
+                <version>${revision}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

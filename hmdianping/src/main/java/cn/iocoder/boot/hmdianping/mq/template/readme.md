@@ -1,0 +1,7 @@
+- 在MQ的概念中RocketMQTemplate就是producer
+- 引入RocketMQTemplate后默认有一个名为rocketMQTemplate的bean，用来发送全局通用消息
+- RocketMQTemplate分为事务型和非事务型两种，事务型消息需要在发送时指定事务监听器，如VoucherOrderTransactionListener，监听器用@RocketMQTransactionListener(rocketMQTemplateBeanName = "seckillRocketMQTemplate")
+来与RocketMQTemplate进行绑定
+- 非事务型RocketMQTemplate完全可以使用系统的RocketMQTemplate bean
+- 创建的消息队列数量只与topic有关，与RocketMQTemplate数量无关，RocketMQTemplate只是一个发送消息的工具类，发送消息时指定topic即可
+- 创建消息队列的数量与consumer数量有关，每个 @RocketMQMessageListener 都会启动一组消费线程（默认最小 20 个）。如果你有 100 个业务消费者，就会产生 2000 个线程，这确实会显著增加 JVM 堆外内存（Stack Size） 和 CPU 上下文切换 的压力

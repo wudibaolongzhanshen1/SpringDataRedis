@@ -132,7 +132,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         if (!voucherOrderDOS.isEmpty()) {
             throw new ServiceException(500, "不允许重复下单！");
         }
-        voucherOrderRedisDAO.setList(loginUserId, voucherId, voucherOrderDOS);
+//        voucherOrderRedisDAO.setList(loginUserId, voucherId, voucherOrderDOS);
         boolean success = seckillVoucherService.update().setSql("stock = stock - 1").
                 eq("voucher_id", voucherId).
                 gt("stock", 0).

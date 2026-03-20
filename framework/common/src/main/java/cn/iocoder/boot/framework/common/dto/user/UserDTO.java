@@ -1,5 +1,9 @@
 package cn.iocoder.boot.framework.common.dto.user;
 
+
+import lombok.Data;
+
+@Data
 public class UserDTO {
     private Long id;
 

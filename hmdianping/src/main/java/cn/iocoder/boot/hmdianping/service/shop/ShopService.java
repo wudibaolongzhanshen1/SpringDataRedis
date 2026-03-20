@@ -17,4 +17,5 @@ public interface ShopService extends IService<ShopDO> {
 
     public Integer saveShop(ShopDO shopDO);
 
+    Boolean deleteById(Long id);
 }

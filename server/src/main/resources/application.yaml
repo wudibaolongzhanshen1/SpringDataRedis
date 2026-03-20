@@ -1,4 +1,20 @@
 spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      # password: your_password
+      lettuce:
+        pool:
+          max-active: 100
+          max-wait: 3000ms
+  cache:
+    type: caffeine
+    cache-names:
+      - shopCache
+      - userCache
+    caffeine:
+      spec: initialCapacity=100,maximumSize=500,expireAfterWrite=10m
   datasource:
     url: jdbc:mysql://localhost:3306/hmdp?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     username: root
@@ -51,3 +67,24 @@ rocketmq:
 canal:
   mq:
     topic: canal-test-topic
+
+
+app:
+  cache:
+    configs:
+      shopCache:
+        ttl: 3600
+        maxSize: 1000
+      userCache:
+        ttl: 1800
+        maxSize: 200
+
+
+logging:
+  level:
+    # 监控整个缓存抽象层的活动
+    org.springframework.cache: TRACE
+    # 专门监控切面拦截逻辑
+    org.springframework.cache.interceptor: TRACE
+    # 如果怀疑是配置加载问题，可以监控配置项
+    org.springframework.boot.autoconfigure.cache: TRACE

@@ -11,7 +11,7 @@ import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.messaging.Message;
 
-@RocketMQTransactionListener
+@RocketMQTransactionListener(rocketMQTemplateBeanName = "seckillRocketMQTemplate")
 @RequiredArgsConstructor
 @Slf4j
 public class VoucherOrderTransactionListener implements RocketMQLocalTransactionListener {
@@ -24,6 +24,7 @@ public class VoucherOrderTransactionListener implements RocketMQLocalTransaction
      */
     @Override
     public RocketMQLocalTransactionState executeLocalTransaction(Message msg, Object arg) {
+        log.warn("VoucherOrderTransactionListener.executeLocalTransaction 执行本地事务，消息内容：{}", new String((byte[]) msg.getPayload()));
         try {
             VoucherOrderMessage payload = JSON.parseObject(new String((byte[]) msg.getPayload()), VoucherOrderMessage.class);
             // 执行 Lua 脚本：判断库存、判重、扣减并记录成功标记
@@ -32,6 +33,13 @@ public class VoucherOrderTransactionListener implements RocketMQLocalTransaction
             if (result == 0) {
                 return RocketMQLocalTransactionState.COMMIT;
             } else {
+                if (result == 1) {
+                    log.warn("库存不足");
+                } else if (result == 2) {
+                    log.warn("不能重复下单");
+                } else if (result == 3) {
+                    log.warn("voucherId对应的优惠券不存在");
+                }
                 return RocketMQLocalTransactionState.ROLLBACK;
             }
         } catch (Exception e) {
@@ -45,6 +53,7 @@ public class VoucherOrderTransactionListener implements RocketMQLocalTransaction
      */
     @Override
     public RocketMQLocalTransactionState checkLocalTransaction(Message msg) {
+        log.warn("VoucherOrderTransactionListener.checkLocalTransaction 回查本地事务，消息内容：{}", new String((byte[]) msg.getPayload()));
         VoucherOrderMessage payload = JSON.parseObject(new String((byte[]) msg.getPayload()), VoucherOrderMessage.class);
         // 去 Redis 查询“抢购成功名单”中是否存在该用户
         // 这要求 Lua 脚本在执行成功时，必须 sadd 进一个标记 Key

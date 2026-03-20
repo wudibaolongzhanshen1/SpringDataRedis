@@ -2,6 +2,7 @@ package cn.iocoder.boot.hmdianping.mq.producer;
 
 import cn.iocoder.boot.hmdianping.enums.rocketmq.VoucherOrderMqConstants;
 import cn.iocoder.boot.hmdianping.mq.message.VoucherOrderMessage;
+import cn.iocoder.boot.hmdianping.mq.template.SeckillRocketMQTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.TransactionSendResult;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class VoucherOrderProducer {
 
-    private final RocketMQTemplate rocketMQTemplate;
+    private final SeckillRocketMQTemplate seckillRocketMQTemplate;
 
     /**
      * 发送秒杀下单事务消息
@@ -26,7 +27,7 @@ public class VoucherOrderProducer {
         VoucherOrderMessage message = VoucherOrderMessage.builder()
                 .orderId(orderId).voucherId(voucherId).userId(loginUserId).build();
         // 封装发送细节，Service 层不再关心 Topic 和 MessageBuilder
-        return rocketMQTemplate.sendMessageInTransaction(
+        return seckillRocketMQTemplate.sendMessageInTransaction(
                 VoucherOrderMqConstants.TOPIC_SECKILL,
                 MessageBuilder.withPayload(message).build(),
                 null // 这里可以传额外的参数给监听器

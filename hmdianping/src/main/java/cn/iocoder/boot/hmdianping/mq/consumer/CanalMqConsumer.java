@@ -2,6 +2,7 @@ package cn.iocoder.boot.hmdianping.mq.consumer;
 
 import cn.iocoder.boot.hmdianping.canal.context.CanalHandlerContext;
 import cn.iocoder.boot.hmdianping.canal.handler.EntryHandler;
+import cn.iocoder.boot.hmdianping.canal.handler.NginxCacheHandler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.otter.canal.protocol.FlatMessage;
 import jakarta.annotation.Resource;
@@ -20,6 +21,8 @@ public class CanalMqConsumer implements RocketMQListener<String> {
 
     @Resource
     private CanalHandlerContext handlerContext;
+    @Resource
+    private NginxCacheHandler nginxCacheHandler;
 
     @Override
     public void onMessage(String message) {
@@ -29,6 +32,9 @@ public class CanalMqConsumer implements RocketMQListener<String> {
             FlatMessage flatMessage = JSON.parseObject(message, FlatMessage.class);
             if (flatMessage == null || flatMessage.getData() == null) {
                 return;
+            }
+            if (flatMessage.getType().equals("UPDATE") || flatMessage.getType().equals("DELETE")) {
+                nginxCacheHandler.handleCanalMessage(flatMessage);
             }
             // 2. 获取表名并分发给对应的策略处理器
             String tableName = flatMessage.getTable();

@@ -126,6 +126,10 @@
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
         </dependency>
+        <dependency>
+            <groupId>cn.iocoder.boot</groupId>
+            <artifactId>my-spring-boot-starter-cache</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

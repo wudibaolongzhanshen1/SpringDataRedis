@@ -19,6 +19,7 @@
         <module>my-spring-boot-starter-redis</module>
         <module>my-spring-boot-starter-job</module>
         <module>my-spring-boot-starter-mq</module>
+        <module>my-spring-boot-starter-cache</module>
         <module>common</module>
     </modules>
 

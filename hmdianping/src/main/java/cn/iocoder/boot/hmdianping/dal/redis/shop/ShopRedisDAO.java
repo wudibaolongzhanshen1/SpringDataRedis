@@ -26,6 +26,11 @@ public class ShopRedisDAO {
         stringRedisTemplate.opsForValue().set(redisKey, JsonUtils.toJsonString(shopDO));
     }
 
+    public Boolean remove(Long id) {
+        String redisKey = formatKey(id);
+        return stringRedisTemplate.delete(redisKey);
+    }
+
     private String formatKey(Long id) {
         return String.format(RedisKeyConstants.SHOP_ID, id);
     }

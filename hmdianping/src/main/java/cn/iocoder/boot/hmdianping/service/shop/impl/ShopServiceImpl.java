@@ -8,13 +8,12 @@ import cn.iocoder.boot.hmdianping.service.shop.ShopService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
-import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -44,6 +43,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, ShopDO> implements 
     private CacheClient cacheClient;
 
     @Override
+    @Cacheable(value = "shopCache", key = "'id:' + #id", unless = "#result == null")
     public ShopDO selectById(Long id) {
         return cacheClient.queryWithMutexAndBloom(
                 "shop:", id, ShopDO.class,
@@ -58,5 +58,14 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, ShopDO> implements 
         shopBloomFilter.add(shopDO.getId());
         shopRedisDAO.set(shopDO);
         return nums;
+    }
+
+    @Override
+    @CacheEvict(value = "shopCache", key = "'id:' + #id")
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean deleteById(Long id) {
+        this.removeById(id);
+        shopRedisDAO.remove(id);
+        return Boolean.TRUE;
     }
 }

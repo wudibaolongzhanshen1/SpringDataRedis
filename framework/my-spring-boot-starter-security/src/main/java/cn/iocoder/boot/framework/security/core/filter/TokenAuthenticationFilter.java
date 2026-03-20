@@ -41,6 +41,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        System.out.println("TokenAuthenticationFilter 过滤器被调用了");
         String headerName = securityProperties.getTokenHeader();
         String token = request.getHeader(headerName);
         if (StrUtil.isEmpty(token)) {

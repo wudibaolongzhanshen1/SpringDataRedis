@@ -130,6 +130,10 @@
             <groupId>cn.iocoder.boot</groupId>
             <artifactId>my-spring-boot-starter-cache</artifactId>
         </dependency>
+        <dependency>
+            <groupId>me.zhyd.oauth</groupId>
+            <artifactId>JustAuth</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

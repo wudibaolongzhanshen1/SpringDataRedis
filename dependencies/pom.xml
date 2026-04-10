@@ -67,6 +67,7 @@
         <canal.version>1.1.8</canal.version>
         <google.protobuf.version>3.11.4</google.protobuf.version>
         <caffeine.version>3.1.8</caffeine.version>
+        <justauth.version>1.16.7</justauth.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -370,6 +371,11 @@
                 <groupId>cn.iocoder.boot</groupId>
                 <artifactId>my-spring-boot-starter-cache</artifactId>
                 <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>me.zhyd.oauth</groupId>
+                <artifactId>JustAuth</artifactId>
+                <version>${justauth.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

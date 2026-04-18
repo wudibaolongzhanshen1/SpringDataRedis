@@ -1,0 +1,28 @@
+# 修复循环依赖问题 - 禁用Redis监控
+spring:
+  # 数据源配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/hmdp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # Redis监控配置
+  redis:
+    monitor:
+      enabled: false  # 禁用Redis监控以解决循环依赖
+
+  # Quartz配置
+  quartz:
+    job-store-type: memory  # 使用内存存储，避免数据库连接问题
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: HmdpScheduler
+            instanceId: AUTO
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10
+            threadPriority: 5
+            threadsInheritContextClassLoaderOfInitializingThread: true

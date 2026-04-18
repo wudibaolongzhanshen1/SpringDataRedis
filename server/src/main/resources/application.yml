@@ -1,0 +1,137 @@
+# Spring Boot 应用配置
+spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      # password: your_password
+      lettuce:
+        pool:
+          max-active: 100
+          max-wait: 3000ms
+
+    # Redis监控配置 - 默认禁用以避免循环依赖
+    monitor:
+      enabled: false
+      metric-prefix: redis
+      slow-query-threshold: 100  # 100ms以上认为是慢查询
+      health-check-enabled: true
+      alert:
+        memory-usage-threshold: 80.0  # 内存使用率告警阈值
+        error-rate-threshold: 5.0     # 错误率告警阈值
+
+  # 缓存配置
+  cache:
+    type: caffeine
+    cache-names:
+      - shopCache
+      - userCache
+    caffeine:
+      spec: initialCapacity=100,maximumSize=500,expireAfterWrite=10m
+
+  # 数据源配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/hmdp?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # Spring Security 配置
+  security:
+    user:
+      name: admin
+      password: 123456
+
+  # 应用名称配置
+  application:
+    name: hmdp-server
+
+  # MyBatis配置
+  mybatis-plus:
+    mapper-locations: classpath*:/mapper/**/*.xml
+    type-aliases-package: cn.iocoder.boot.hmdianping.dal.dataobject
+    configuration:
+      map-underscore-to-camel-case: true
+      log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+  # Quartz配置 - 使用内存存储避免数据库初始化问题
+  quartz:
+    job-store-type: memory
+    auto-startup: true
+    wait-for-jobs-to-complete-on-shutdown: true
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: HmdpScheduler
+            instanceId: AUTO
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10
+            threadPriority: 5
+            threadsInheritContextClassLoaderOfInitializingThread: true
+
+  # 注意：如果仍有循环依赖问题，可以取消注释以下配置
+  # main:
+  #   allow-circular-references: true
+
+# 服务器配置
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+# 日志配置
+logging:
+  level:
+    cn.iocoder.boot: DEBUG
+    org.springframework.data.redis: WARN
+    # 监控整个缓存抽象层的活动
+    org.springframework.cache: TRACE
+    # 专门监控切面拦截逻辑
+    org.springframework.cache.interceptor: TRACE
+    # 如果怀疑是配置加载问题，可以监控配置项
+    org.springframework.boot.autoconfigure.cache: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# 应用配置
+app:
+  name: 黑马点评
+  version: 1.0.0
+  cache:
+    configs:
+      shopCache:
+        ttl: 3600
+        maxSize: 1000
+      userCache:
+        ttl: 1800
+        maxSize: 200
+
+# 自定义配置
+chenzilin:
+  info:
+    base-package: cn.iocoder.boot
+  security:
+    mock-enable: true
+
+# SpringDoc OpenAPI 配置
+springdoc:
+  api-docs:
+    enabled: true # 开启 OpenAPI 接口文档
+  swagger-ui:
+    enabled: true # 开启 Swagger-UI 界面
+  writer-with-default-pretty-printer: true # 格式化输出 JSON
+
+# RocketMQ 配置
+rocketmq:
+  name-server: 127.0.0.1:9876 # 生产环境建议配置多个，用分号隔开
+  producer:
+    group: g_hmdp_producer    # 必须指定生产者组
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+
+# Canal 配置
+canal:
+  mq:
+    topic: canal-test-topic

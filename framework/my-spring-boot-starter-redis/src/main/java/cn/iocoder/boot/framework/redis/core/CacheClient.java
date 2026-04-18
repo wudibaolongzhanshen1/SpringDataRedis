@@ -4,12 +4,16 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import cn.iocoder.boot.framework.common.exception.RedisException;
+import cn.iocoder.boot.framework.common.exception.enums.RedisErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -65,7 +69,7 @@ public class CacheClient {
             boolean getLock = rLock.tryLock(5, TimeUnit.SECONDS);
             if (!getLock) {
                 log.warn("获取锁超时，放弃等待。lockKey={}", lockKey);
-                throw new RuntimeException("系统繁忙，请稍后再试");
+                throw new RedisException(RedisErrorCodeConstants.REDIS_LOCK_TIMEOUT);
             }
             // 4. 二重检查缓存
             json = stringRedisTemplate.opsForValue().get(key);
@@ -79,14 +83,16 @@ public class CacheClient {
             R dbResult = dbFallback.apply(id);
             // 6. 回写缓存及空值兜底
             if (dbResult == null) {
+                // 空值缓存，使用2分钟固定时间
                 stringRedisTemplate.opsForValue().set(key, "", 2, TimeUnit.MINUTES);
             } else {
-                stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(dbResult));
+                // 正常缓存，设置30分钟过期时间
+                stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(dbResult), 30, TimeUnit.MINUTES);
             }
             return dbResult;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
+            throw new RedisException("Redis操作被中断", e);
         } finally {
             if (rLock.isHeldByCurrentThread()) {
                 rLock.unlock();
@@ -113,7 +119,7 @@ public class CacheClient {
         try {
             boolean getLock = rLock.tryLock(5, TimeUnit.SECONDS);
             if (!getLock) {
-                throw new RuntimeException("系统繁忙，请稍后再试");
+                throw new RedisException(RedisErrorCodeConstants.REDIS_LOCK_TIMEOUT);
             }
             // 4. 二重检查缓存
             if (BooleanUtil.isTrue(stringRedisTemplate.hasKey(key))) {
@@ -141,12 +147,36 @@ public class CacheClient {
             return dbResult;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("操作被中断", e);
+            throw new RedisException("Redis操作被中断", e);
         } finally {
             if (rLock.isHeldByCurrentThread()) {
                 rLock.unlock();
             }
         }
+    }
+
+    /**
+     * 安全的Redis操作，带重试机制
+     */
+    @Retryable(value = {
+            org.springframework.data.redis.RedisConnectionFailureException.class,
+            org.springframework.dao.QueryTimeoutException.class
+    }, maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 1.5))
+    public <T> T executeWithRetry(RedisOperation<T> operation) {
+        try {
+            return operation.execute();
+        } catch (Exception e) {
+            log.error("Redis操作失败，将进行重试", e);
+            throw new RedisException("Redis操作失败", e);
+        }
+    }
+
+    /**
+     * Redis操作接口
+     */
+    @FunctionalInterface
+    public interface RedisOperation<T> {
+        T execute();
     }
 
     /**

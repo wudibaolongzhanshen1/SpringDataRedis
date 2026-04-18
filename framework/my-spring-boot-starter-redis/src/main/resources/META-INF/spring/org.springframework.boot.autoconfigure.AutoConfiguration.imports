@@ -1,1 +1,2 @@
+cn.iocoder.boot.framework.redis.config.RedisAutoConfiguration
 cn.iocoder.boot.framework.redis.config.RateLimitAutoConfiguration

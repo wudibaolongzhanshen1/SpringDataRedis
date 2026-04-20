@@ -7,8 +7,11 @@ spring:
       # password: your_password
       lettuce:
         pool:
-          max-active: 100
-          max-wait: 3000ms
+          max-active: 500
+          max-idle: 100
+          min-idle: 20
+          max-wait: 1000ms
+          time-between-eviction-runs: 60000ms
 
     # Redis监控配置 - 默认禁用以避免循环依赖
     monitor:
@@ -115,6 +118,16 @@ chenzilin:
   security:
     mock-enable: true
 
+# ID生成器配置
+id:
+  generator:
+    type: snowflake  # snowflake | redis，默认使用雪花算法
+
+# 雪花算法配置
+snowflake:
+  datacenter-id: 1    # 数据中心ID (0-31)
+  machine-id: 1       # 机器ID (0-31)
+
 # SpringDoc OpenAPI 配置
 springdoc:
   api-docs:
@@ -126,12 +139,67 @@ springdoc:
 # RocketMQ 配置
 rocketmq:
   name-server: 127.0.0.1:9876 # 生产环境建议配置多个，用分号隔开
+  # 生产者通用配置
   producer:
     group: g_hmdp_producer    # 必须指定生产者组
     send-message-timeout: 3000
     retry-times-when-send-failed: 2
+    max-message-size: 4194304  # 4MB
+    compress-message-body-threshold: 4096  # 4KB以上压缩
+    retry-next-server: false
+    # 允许自动创建Topic（默认是true）
+    # auto-create-topic-enable: true
+    # 连接池配置
+    client:
+      client-worker-threads: 4
+      client-callback-executor-threads: 4
+      client-selector-threads: 1
+      client-channel-max-idle-time-seconds: 120
+      client-socket-sndbuf-size: 65535
+      client-socket-rcvbuf-size: 65535
+      client-worker-thread-queue-capacity: 10000
 
 # Canal 配置
 canal:
   mq:
     topic: canal-test-topic
+
+
+rate-limit:
+  # 基础开关
+  enable-sliding-window: false
+  enable-penalty: false
+
+  # 全局 IP 限流配置 (5秒内最多3次)
+  ip-window-millis: 5000
+  ip-max-attempts: 3
+
+  # 全局用户限流配置 (1分钟内最多5次)
+  user-window-millis: 60000
+  user-max-attempts: 5
+
+  # 白名单配置 (支持集合格式)
+  ip-whitelist:
+    - 127.0.0.1
+    - 192.168.1.100
+  user-whitelist: [1001, 1002, 1003]
+
+  # 惩罚机制 (封禁逻辑)
+  violation-window-seconds: 60
+  ip-block-threshold: 5
+  user-block-threshold: 5
+  ip-block-ttl-seconds: 300
+  user-block-ttl-seconds: 300
+
+  # 针对具体接口的细粒度限流 (嵌套对象 EndpointLimit)
+  issue:
+    ip-window-millis: 1000
+    ip-max-attempts: 1
+    user-window-millis: 10000
+    user-max-attempts: 2
+
+  seckill:
+    ip-window-millis: 2000
+    ip-max-attempts: 2
+    user-window-millis: 30000
+    user-max-attempts: 1

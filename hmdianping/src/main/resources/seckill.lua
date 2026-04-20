@@ -16,9 +16,9 @@ if (tonumber(stock) <= 0) then
 end
 
 -- 3. 重复下单判定
-if (redis.call('sismember', orderKey, userId) == 1) then
-    return 2 -- 状态 2：已经购买过了
-end
+--if (redis.call('sismember', orderKey, userId) == 1) then
+--    return 2 -- 状态 2：已经购买过了
+--end
 
 -- 4. 执行扣减
 redis.call('incrby', stockKey, -1)

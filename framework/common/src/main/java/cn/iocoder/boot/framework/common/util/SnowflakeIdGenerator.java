@@ -4,6 +4,9 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+
 
 /**
  * 雪花算法ID生成器
@@ -38,11 +41,11 @@ public class SnowflakeIdGenerator {
     @Value("${snowflake.machine-id:1}")
     private long machineId;
 
-    // 序列号
-    private long sequence = 0L;
+    // 序列号 - 使用AtomicLong保证原子性
+    private final AtomicLong sequence = new AtomicLong(0L);
 
-    // 上一次时间戳
-    private long lastTimestamp = -1L;
+    // 上一次时间戳 - 使用volatile保证可见性
+    private volatile long lastTimestamp = -1L;
 
     @PostConstruct
     public void init() {
@@ -55,37 +58,36 @@ public class SnowflakeIdGenerator {
     }
 
     /**
-     * 生成下一个ID
+     * 修复后的版本：适配 AtomicLong 类型
      */
     public synchronized long nextId() {
         long timestamp = timeGen();
-
-        // 如果当前时间小于上一次ID生成的时间戳，说明系统时钟回退过，抛出异常
+        // 1. 时钟回拨检查
         if (timestamp < lastTimestamp) {
             throw new RuntimeException("Clock moved backwards. Refusing to generate id");
         }
-
-        // 如果是同一时间生成的，则进行毫秒内序列
+        // 2. 同一毫秒内的处理
         if (lastTimestamp == timestamp) {
-            sequence = (sequence + 1) & MAX_SEQUENCE;
-            // 毫秒内序列溢出
-            if (sequence == 0) {
-                // 阻塞到下一个毫秒，获得新的时间戳
+            // 修复点：使用 getAndIncrement 或 addAndGet，然后手动赋值回 AtomicLong
+            // 注意：AtomicLong 没有直接支持 & 操作的 setter，需要先计算再 set
+            long nextSeq = (sequence.incrementAndGet()) & MAX_SEQUENCE;
+            sequence.set(nextSeq);
+            if (nextSeq == 0) {
+                // 毫秒内溢出，阻塞到下一毫秒
                 timestamp = tilNextMillis(lastTimestamp);
             }
         } else {
-            // 时间戳改变，毫秒内序列重置
-            sequence = 0L;
+            // 3. 毫秒改变，重置序列号
+            // 修复点：不能直接用 = 0L，必须用 .set()
+            sequence.set(0L);
         }
-
-        // 上次生成ID的时间截
         lastTimestamp = timestamp;
-
-        // 移位并通过或运算拼到一起组成64位的ID
+        // 4. 移位拼接 ID
+        // 修复点：不能直接用 | sequence，必须用 .get() 获取 long 值
         return ((timestamp - START_TIMESTAMP) << TIMESTAMP_LEFT)
                 | (datacenterId << DATACENTER_LEFT)
                 | (machineId << MACHINE_LEFT)
-                | sequence;
+                | sequence.get();
     }
 
     /**

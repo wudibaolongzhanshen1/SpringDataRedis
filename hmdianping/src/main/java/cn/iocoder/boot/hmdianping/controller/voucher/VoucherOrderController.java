@@ -32,7 +32,7 @@ public class VoucherOrderController {
     @PostMapping("/createSeckillVoucherOrder")
     @Operation(summary = "秒杀下单优惠券，一人一单", description = "秒杀下单优惠券，一人一单")
     public void createSeckillVoucherOrder(Long voucherId) throws Exception {
-        rateLimitHandler.execute(voucherId, SecurityFrameworkUtils.getLoginUserId(), RateLimitScene.SECKILL_ORDER);
+//        rateLimitHandler.execute(voucherId, SecurityFrameworkUtils.getLoginUserId(), RateLimitScene.SECKILL_ORDER);
         voucherOrderService.seckillVoucherLua(voucherId);
     }
 

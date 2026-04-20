@@ -2,6 +2,7 @@ package cn.iocoder.boot.framework.redis.core;
 
 
 import cn.iocoder.boot.framework.common.util.SnowflakeIdGenerator;
+import cn.iocoder.boot.framework.common.util.SnowflakeIdGeneratorLockFree;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -29,11 +30,15 @@ public class RedisIdWorker {
     @Autowired(required = false)
     private SnowflakeIdGenerator snowflakeIdGenerator;
 
+    @Autowired(required = false)
+    private SnowflakeIdGeneratorLockFree snowflakeIdGeneratorLockFree;
+
     @Value("${id.generator.type:snowflake}")
     private String idGeneratorType;
 
     /**
      * 生成下一个ID
+     *
      * @param keyPrefix 业务前缀（仅Redis模式使用）
      * @return 生成的ID
      */
@@ -41,7 +46,7 @@ public class RedisIdWorker {
         if ("redis".equalsIgnoreCase(idGeneratorType)) {
             return nextIdByRedis(keyPrefix);
         } else {
-            // 默认使用雪花算法
+            // 默认使用雪花算法，优先使用无锁版本
             return nextIdBySnowflake();
         }
     }
@@ -60,8 +65,15 @@ public class RedisIdWorker {
 
     /**
      * 使用雪花算法生成ID
+     * 优先使用无锁版本，如果无锁版本不可用则使用有锁版本
      */
     private long nextIdBySnowflake() {
+        // 优先使用无锁版本
+        if (snowflakeIdGeneratorLockFree != null) {
+            return snowflakeIdGeneratorLockFree.nextId();
+        }
+
+        // 无锁版本不可用，使用有锁版本
         if (snowflakeIdGenerator == null) {
             throw new IllegalStateException("SnowflakeIdGenerator is not available. Please check if it's properly configured.");
         }
@@ -73,5 +85,20 @@ public class RedisIdWorker {
      */
     public String getIdGeneratorType() {
         return idGeneratorType;
+    }
+
+    /**
+     * 获取当前使用的雪花算法版本
+     *
+     * @return "lock-free" 或 "synchronized" 或 "none"
+     */
+    public String getSnowflakeVersion() {
+        if (snowflakeIdGeneratorLockFree != null) {
+            return "lock-free";
+        } else if (snowflakeIdGenerator != null) {
+            return "synchronized";
+        } else {
+            return "none";
+        }
     }
 }
